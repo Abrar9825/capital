@@ -47,20 +47,24 @@ connectDB().then(async () => {
         // Index doesn't exist, that's fine
       }
     }
+    
+    console.log('✅ Database connected and ready');
   } catch (err) {
     console.log('Index cleanup skipped:', err.message);
   }
+}).catch(err => {
+  console.error('❌ Database connection failed:', err.message);
+  process.exit(1);
 });
 
 // ============================================
 // MIDDLEWARE
 // ============================================
 app.use(cors({
-  origin: '*',
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  origin: 'https://capital-yk88.onrender.com',
+  credentials: true
 }));
+
 
 // Increase body size limit for PDF uploads (50MB)
 app.use(express.json({ limit: '50mb' }));
