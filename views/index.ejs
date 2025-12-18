@@ -118,10 +118,14 @@
     </div>
 
     <script>
+        const API_BASE = window.location.hostname === 'localhost' 
+            ? 'http://localhost:5000/api' 
+            : 'https://capital-yk88.onrender.com';
+
         async function loadDashboardData() {
             try {
                 // Fetch bills
-                const billsRes = await fetch('http://localhost:5000/api/bills/all');
+                const billsRes = await fetch(`${API_BASE}/bills/all`);
                 const billsData = await billsRes.json();
                 const bills = billsData.data || [];
 
@@ -135,7 +139,7 @@
                 document.getElementById('stat-totalSales').textContent = '₹' + totalSales.toLocaleString('en-IN');
 
                 // Fetch products
-                const productsRes = await fetch('http://localhost:5000/api/products/all');
+                const productsRes = await fetch(`${API_BASE}/products/all`);
                 const productsData = await productsRes.json();
                 const products = productsData.data || [];
                 const activeProducts = products.filter(p => p.stock && p.stock > 0).length;
