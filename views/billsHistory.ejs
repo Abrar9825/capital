@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bills History - SmartBill+ Capital</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Poppins', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
+        .hover-lift { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .hover-lift:hover { transform: translateY(-4px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+        .fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .pulse-glow { animation: pulse-glow 2s infinite; }
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(102, 126, 234, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.8), 0 0 30px rgba(102, 126, 234, 0.6); }
+        }
+        .nav-active { background: linear-gradient(to right, #2563eb, #4f46e5); color: white; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        
+        /* Dark Mode */
+        body.dark-mode { background: linear-gradient(to bottom right, #0f172a, #1e293b, #334155); }
+        body.dark-mode .glass { background: rgba(30, 41, 59, 0.7); border-color: rgba(71, 85, 105, 0.3); }
+        body.dark-mode .text-gray-900 { color: #f1f5f9 !important; }
+        body.dark-mode .text-gray-700 { color: #cbd5e1 !important; }
+        body.dark-mode .text-gray-600 { color: #cbd5e1 !important; }
+        body.dark-mode .bg-white { background-color: #1e293b !important; }
+        body.dark-mode .border-gray-200 { border-color: #334155 !important; }
+        body.dark-mode .hover\:bg-white\/50:hover { background-color: rgba(51, 65, 85, 0.5) !important; }
+        body.dark-mode input, body.dark-mode select { background-color: #1e293b !important; color: #e2e8f0 !important; border-color: #475569 !important; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div class="flex h-screen">
+        <!-- Include Sidebar Partial -->
+        <%- include('partials/sidebar', { currentPage: 'reports' }); %>
+
+            <div id="overlay" class="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden hidden"
+                onclick="toggleSidebar()"></div>
+
+            <div class="flex flex-1 flex-col lg:ml-64">
+                <header class="flex h-16 items-center justify-between px-4 sm:px-6 glass border-b border-white/20">
+                    <div class="flex items-center space-x-4">
+                        <button onclick="toggleSidebar()" class="lg:hidden p-2 hover:bg-white/10 rounded-lg transition">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                            </svg>
+                        </button>
+                        <h1 class="text-lg font-bold text-gray-900">📋 Bills History</h1>
+                    </div>
+                    <button onclick="downloadCSV()" class="hidden sm:flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-medium rounded-lg transition text-sm">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        <span>Download</span>
+                    </button>
+                </header>
+
+                <main class="flex-1 overflow-auto p-3 sm:p-4">
+                    <div class="fade-in max-w-6xl mx-auto">
+                        <!-- Search & Filter -->
+                        <div class="glass rounded-lg p-3 sm:p-4 mb-4">
+                            <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                                <input type="text" id="searchInput" placeholder="Search bill number or customer..." 
+                                    class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-blue-500 bg-white"
+                                    onkeyup="filterBills()">
+                                <select id="statusFilter" onchange="filterBills()" 
+                                    class="px-3 py-2 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-blue-500 bg-white">
+                                    <option value="">All Status</option>
+                                    <option value="completed">Completed</option>
+                                    <option value="pending">Pending</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Bills Table (Mobile Card View) -->
+                        <div id="billsContainer" class="space-y-2 sm:space-y-3">
+                            <div class="text-center text-gray-500 py-8">Loading bills history...</div>
+                        </div>
+
+                        <!-- Pagination -->
+                        <div id="pagination" class="flex items-center justify-center gap-2 mt-6 flex-wrap">
+                        </div>
+                    </div>
+                </main>
+            </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin + '/api';
+        let allBills = [];
+        let filteredBills = [];
+        let currentPage = 1;
+        const billsPerPage = 20;
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        // Format currency
+        function formatCurrency(value) {
+            if (!value || value < 0) value = 0;
+            const num = parseFloat(value);
+            if (isNaN(num)) return '₹0';
+            return new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(num);
+        }
+
+        // Load all bills
+        async function loadBills() {
+            try {
+                const response = await fetch(`${API_BASE}/bills/all`);
+                const data = await response.json();
+                if (data.success && data.data) {
+                    allBills = data.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                    filteredBills = allBills;
+                    renderBills();
+                }
+            } catch (error) {
+                console.error('Error loading bills:', error);
+                document.getElementById('billsContainer').innerHTML = '<div class="text-center text-red-500 py-8">Error loading bills</div>';
+            }
+        }
+
+        // Filter bills
+        function filterBills() {
+            const searchText = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+
+            filteredBills = allBills.filter(bill => {
+                const matchesSearch = !searchText || 
+                    (bill.billNumber && bill.billNumber.toLowerCase().includes(searchText)) ||
+                    (bill.customerName && bill.customerName.toLowerCase().includes(searchText));
+                const matchesStatus = !statusFilter || bill.paymentStatus === statusFilter;
+                return matchesSearch && matchesStatus;
+            });
+
+            currentPage = 1;
+            renderBills();
+        }
+
+        // Render bills
+        function renderBills() {
+            const container = document.getElementById('billsContainer');
+            const start = (currentPage - 1) * billsPerPage;
+            const end = start + billsPerPage;
+            const pageData = filteredBills.slice(start, end);
+
+            if (pageData.length === 0) {
+                container.innerHTML = '<div class="text-center text-gray-500 py-8">No bills found</div>';
+                renderPagination();
+                return;
+            }
+
+            container.innerHTML = pageData.map(bill => {
+                const billDate = new Date(bill.createdAt).toLocaleDateString('en-IN');
+                const billAmount = bill.totalAmount || (bill.subtotal - (bill.discountAmount || 0) + (bill.taxAmount || 0)) || 0;
+                const statusColor = bill.paymentStatus === 'completed' ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-200';
+                const statusText = bill.paymentStatus === 'completed' ? '✓ Completed' : 'Pending';
+                const statusColor2 = bill.paymentStatus === 'completed' ? 'text-green-700 bg-green-100' : 'text-yellow-700 bg-yellow-100';
+                const itemCount = (bill.items || []).length;
+
+                return `
+                    <div class="glass hover-lift rounded-lg p-3 sm:p-4 border ${statusColor} transition cursor-pointer" onclick="viewBill('${bill._id || bill.billNumber}')">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
+                            <div>
+                                <p class="text-xs text-gray-600 font-semibold">Bill #</p>
+                                <p class="text-sm sm:text-base font-bold text-gray-900">${bill.billNumber || 'N/A'}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-600 font-semibold">Customer</p>
+                                <p class="text-sm sm:text-base font-semibold text-gray-900 truncate">${bill.customerName || 'Customer'}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-600 font-semibold">Date</p>
+                                <p class="text-sm sm:text-base font-semibold text-gray-900">${billDate}</p>
+                            </div>
+                            <div class="flex items-end justify-between sm:block">
+                                <div>
+                                    <p class="text-xs text-gray-600 font-semibold">Amount</p>
+                                    <p class="text-sm sm:text-base font-bold text-green-600">${formatCurrency(billAmount)}</p>
+                                </div>
+                                <div class="flex gap-1 sm:mt-2">
+                                    <span class="text-xs px-2 py-1 rounded-full font-semibold ${statusColor2}">${statusText}</span>
+                                    <span class="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700 font-semibold">${itemCount} items</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            renderPagination();
+        }
+
+        // Render pagination
+        function renderPagination() {
+            const paginationDiv = document.getElementById('pagination');
+            const totalPages = Math.ceil(filteredBills.length / billsPerPage);
+
+            if (totalPages <= 1) {
+                paginationDiv.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+            
+            // Previous button
+            if (currentPage > 1) {
+                html += `<button onclick="goToPage(${currentPage - 1})" class="px-2 sm:px-3 py-1 sm:py-2 bg-blue-600 text-white rounded-lg text-xs sm:text-sm font-semibold hover:bg-blue-700">← Prev</button>`;
+            }
+
+            // Page buttons
+            for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) {
+                if (i === currentPage) {
+                    html += `<button class="px-2 sm:px-3 py-1 sm:py-2 bg-blue-600 text-white rounded-lg text-xs sm:text-sm font-bold">${i}</button>`;
+                } else {
+                    html += `<button onclick="goToPage(${i})" class="px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 text-gray-700 rounded-lg text-xs sm:text-sm hover:bg-gray-50">${i}</button>`;
+                }
+            }
+
+            // Next button
+            if (currentPage < totalPages) {
+                html += `<button onclick="goToPage(${currentPage + 1})" class="px-2 sm:px-3 py-1 sm:py-2 bg-blue-600 text-white rounded-lg text-xs sm:text-sm font-semibold hover:bg-blue-700">Next →</button>`;
+            }
+
+            paginationDiv.innerHTML = html;
+        }
+
+        // Go to page
+        function goToPage(page) {
+            currentPage = page;
+            renderBills();
+            document.querySelector('main').scrollTop = 0;
+        }
+
+        // View bill details
+        function viewBill(billId) {
+            window.open(`/billPreview?billNumber=${billId}`, '_blank');
+        }
+
+        // Download CSV
+        function downloadCSV() {
+            let csv = 'Bill #,Customer,Date,Amount,Status,Items\n';
+            
+            filteredBills.forEach(bill => {
+                const billDate = new Date(bill.createdAt).toLocaleDateString('en-IN');
+                const billAmount = bill.totalAmount || (bill.subtotal - (bill.discountAmount || 0) + (bill.taxAmount || 0)) || 0;
+                const itemCount = (bill.items || []).length;
+                
+                csv += `"${bill.billNumber || 'N/A'}","${bill.customerName || 'Customer'}","${billDate}",${Math.round(billAmount)},"${bill.paymentStatus || 'pending'}",${itemCount}\n`;
+            });
+
+            const element = document.createElement('a');
+            element.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv));
+            element.setAttribute('download', `bills-history-${new Date().toISOString().split('T')[0]}.csv`);
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+        }
+
+        // Initialize
+        window.onload = function() {
+            if (localStorage.getItem('isLoggedIn') !== 'true') {
+                window.location.href = '/login';
+            }
+
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+            }
+
+            loadBills();
+        };
+    </script>
+</body>
+</html>

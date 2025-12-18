@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Billing - SmartBill+ Capital</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/css/dark-mode.css">
+    <script src="/js/theme-and-notifications.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .hover-lift {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .pulse-glow {
+            animation: pulse-glow 2s infinite;
+        }
+
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 5px rgba(102, 126, 234, 0.5);
+            }
+
+            50% {
+                box-shadow: 0 0 20px rgba(102, 126, 234, 0.8), 0 0 30px rgba(102, 126, 234, 0.6);
+            }
+        }
+
+        .nav-active {
+            background: linear-gradient(to right, #2563eb, #4f46e5);
+            color: white;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-btn {
+            transition: all 0.2s;
+        }
+
+        .product-btn:active {
+            transform: scale(0.95);
+        }
+
+        .cat-active {
+            background: linear-gradient(to right, #2563eb, #4f46e5);
+            color: white;
+        }
+
+        /* Dark Mode */
+        body.dark-mode {
+            background: linear-gradient(to bottom right, #0f172a, #1e293b, #334155);
+        }
+
+        body.dark-mode .glass {
+            background: rgba(30, 41, 59, 0.7);
+            border-color: rgba(71, 85, 105, 0.3);
+        }
+
+        body.dark-mode .text-gray-900 {
+            color: #f1f5f9 !important;
+        }
+
+        body.dark-mode .text-gray-800 {
+            color: #e2e8f0 !important;
+        }
+
+        body.dark-mode .text-gray-700 {
+            color: #cbd5e1 !important;
+        }
+
+        body.dark-mode .text-gray-600 {
+            color: #cbd5e1 !important;
+        }
+
+        body.dark-mode .text-gray-400 {
+            color: #94a3b8 !important;
+        }
+
+        body.dark-mode .text-gray-500 {
+            color: #94a3b8 !important;
+        }
+
+        body.dark-mode .bg-white {
+            background-color: #1e293b !important;
+        }
+
+        body.dark-mode .bg-white\/40 {
+            background-color: rgba(30, 41, 59, 0.4) !important;
+        }
+
+        body.dark-mode .bg-white\/60 {
+            background-color: rgba(30, 41, 59, 0.6) !important;
+        }
+
+        body.dark-mode .bg-orange-50 {
+            background-color: rgba(67, 56, 202, 0.2) !important;
+        }
+
+        body.dark-mode .hover\:bg-orange-100:hover {
+            background-color: rgba(67, 56, 202, 0.3) !important;
+        }
+
+        body.dark-mode .text-orange-600 {
+            color: #fb923c !important;
+        }
+
+        body.dark-mode .border-gray-200 {
+            border-color: #334155 !important;
+        }
+
+        body.dark-mode .border-gray-300 {
+            border-color: #475569 !important;
+        }
+
+        body.dark-mode .hover\:bg-white\/50:hover {
+            background-color: rgba(51, 65, 85, 0.5) !important;
+        }
+
+        body.dark-mode input,
+        body.dark-mode select,
+        body.dark-mode textarea {
+            background-color: #1e293b !important;
+            color: #e2e8f0 !important;
+            border-color: #475569 !important;
+        }
+
+        body.dark-mode h1,
+        body.dark-mode h2,
+        body.dark-mode h3 {
+            color: #f1f5f9 !important;
+        }
+
+        body.dark-mode p {
+            color: #cbd5e1 !important;
+        }
+
+        body.dark-mode svg {
+            color: #f1f5f9 !important;
+            stroke: #f1f5f9 !important;
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div class="flex h-screen">
+        <!-- Include Sidebar Partial -->
+        <%- include('partials/sidebar', { currentPage: 'billing' }); %>
+
+            <div id="overlay" class="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden hidden"
+                onclick="toggleSidebar()"></div>
+
+            <div class="flex flex-1 flex-col lg:ml-64">
+                <%- include('partials/header', { pageTitle: '⚡ Quick Billing' }); %>
+
+                <main class="flex-1 overflow-auto p-3 sm:p-4">
+                    <div class="fade-in max-w-6xl mx-auto">
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                            <!-- Left Section - Product Selection -->
+                            <div class="lg:col-span-2 space-y-3">
+                                <!-- Header -->
+                                <div class="flex items-center justify-between">
+                                    <h2 class="text-lg sm:text-xl font-bold text-gray-900">Create Bill</h2>
+                                    <button onclick="clearBill()"
+                                        class="px-3 py-1.5 text-xs sm:text-sm bg-orange-50 hover:bg-orange-100 text-orange-600 rounded-lg font-medium transition">
+                                        Clear
+                                    </button>
+                                </div>
+
+                                <!-- Product Form -->
+                                <div class="glass rounded-lg p-4 space-y-3">
+                                    <h3 class="text-sm font-bold text-gray-700">Add Product</h3>
+
+                                    <!-- Category Dropdown -->
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-600 mb-1.5">Filter by
+                                            Category</label>
+                                        <select id="categorySelect" onchange="populateProductDropdown()"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-blue-500 bg-white">
+                                            <option value="">-- Select Category --</option>
+                                            <option value="Co-Ord Set">Co-Ord Set</option>
+                                            <option value="Pak Suit">Pak Suit</option>
+                                            <option value="Cotton Suit">Cotton Suit</option>
+                                            <option value="Designer Wear">Designer Wear</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Product Dropdown -->
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-600 mb-1.5">Select
+                                            Product</label>
+                                        <select id="productSelect" onchange="updateProductDetails()"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-blue-500 bg-white">
+                                            <option value="">-- Choose product --</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Product Details Mini Card -->
+                                    <div id="productCard"
+                                        class="hidden bg-white/60 rounded p-1.5 border border-gray-200">
+                                        <div class="flex items-center justify-between gap-1 text-xs">
+                                            <div>
+                                                <p id="detailName" class="font-bold text-gray-900">Silk Pathani Suit</p>
+                                                <div class="flex gap-2">
+                                                    <span id="detailPrice" class="font-bold text-green-600">₹1299</span>
+                                                    <span id="detailStock" class="text-gray-500">6 left</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Quantity Input -->
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-600 mb-1.5">Quantity</label>
+                                        <div class="space-y-2">
+                                            <input type="number" id="qtyInput" min="1" placeholder="Enter quantity"
+                                                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-blue-500">
+                                            <p id="stockInfo" class="text-xs text-gray-500">Available: -- units</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Add Button -->
+                                    <button onclick="addToBill()"
+                                        class="w-full px-3 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-lg text-sm transition">
+                                        Add to Bill
+                                    </button>
+                                </div>
+
+                                <!-- Bill Items List -->
+                                <div class="glass rounded-lg p-4">
+                                    <h3 class="text-sm font-bold text-gray-700 mb-3">Bill Items</h3>
+                                    <div class="space-y-2 max-h-64 overflow-y-auto" id="billItemsList">
+                                        <div class="text-center py-6 text-gray-400">
+                                            <p class="text-sm">No items added yet</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right Section - Bill Summary -->
+                            <div class="lg:col-span-1">
+                                <div class="glass rounded-lg p-4 lg:sticky lg:top-4 space-y-3">
+                                    <h3 class="text-sm font-bold text-gray-700">Bill Summary</h3>
+
+                                    <!-- Form Fields -->
+                                    <div class="space-y-2">
+                                        <input id="customerName" type="text" placeholder="Customer name"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-xs focus:outline-none focus:border-blue-500">
+                                        <input id="phoneNumber" type="tel" placeholder="Phone number"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-xs focus:outline-none focus:border-blue-500">
+                                        <input id="discountInput" type="number" placeholder="Discount (%)" min="0"
+                                            max="100" value="0" onchange="applyDiscount()"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-xs focus:outline-none focus:border-blue-500">
+                                    </div>
+
+                                    <!-- Payment Method -->
+                                    <div>
+                                        <p class="text-xs font-semibold text-gray-600 mb-2">Payment Method</p>
+                                        <div class="flex gap-2">
+                                            <button id="paymentCash" onclick="selectPaymentMethod('cash')"
+                                                class="flex-1 px-2 py-2 bg-blue-600 text-white text-xs font-semibold rounded-lg payment-btn active">Cash</button>
+                                            <button id="paymentUpi" onclick="selectPaymentMethod('upi')"
+                                                class="flex-1 px-2 py-2 border border-gray-300 text-gray-600 text-xs font-semibold rounded-lg hover:bg-gray-50 payment-btn">UPI</button>
+                                            <button id="paymentCredit" onclick="selectPaymentMethod('credit')"
+                                                class="flex-1 px-2 py-2 border border-gray-300 text-gray-600 text-xs font-semibold rounded-lg hover:bg-gray-50 payment-btn">Credit</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Bill Summary Details -->
+                                    <div class="border-t border-gray-200 pt-3 space-y-2 text-xs">
+                                        <div id="gstInfoDisplay"
+                                            class="text-gray-600 text-xs pb-2 border-b border-gray-100"></div>
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600">Subtotal</span>
+                                            <span class="font-semibold">₹<span id="subtotal">0.00</span></span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600">Discount</span>
+                                            <span class="font-semibold">-₹<span id="discount">0.00</span></span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600">Tax (<span
+                                                    id="gstRateDisplay">18</span>%)</span>
+                                            <span class="font-semibold">+₹<span id="tax">0.00</span></span>
+                                        </div>
+                                        <div
+                                            class="border-t border-gray-200 pt-2 flex justify-between font-bold text-sm text-gray-900">
+                                            <span>Total</span>
+                                            <span class="text-green-600">₹<span id="total">0.00</span></span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Generate Bill Button -->
+                                    <button onclick="generateBill()" id="printBtn"
+                                        class="w-full px-3 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold rounded-lg text-sm transition">
+                                        Generate Bill
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000/api';
+        let allProducts = [];
+        let allCategories = [];
+        let currentCategory = '';
+        let selectedProductId = null;
+        let billItems = {};
+        let selectedPaymentMethod = 'cash';
+        let businessSettings = { gstRate: 18, gstNumber: '' };
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('-translate-x-full');
+            document.getElementById('overlay').classList.toggle('hidden');
+        }
+
+        async function loadBusinessSettings() {
+            try {
+                const response = await fetch(`${API_BASE}/settings/all`);
+                const result = await response.json();
+                const settings = Array.isArray(result) ? result : (result.data || []);
+                const settingsObj = {};
+                settings.forEach(item => {
+                    settingsObj[item.key] = item.value;
+                });
+                businessSettings = {
+                    gstRate: parseFloat(settingsObj.gstRate) || 18,
+                    gstNumber: settingsObj.gstNumber || ''
+                };
+                // Update display
+                document.getElementById('gstRateDisplay').textContent = businessSettings.gstRate;
+                if (businessSettings.gstNumber) {
+                    document.getElementById('gstInfoDisplay').textContent = `GST: ${businessSettings.gstNumber}`;
+                }
+            } catch (error) {
+                console.error('Error loading settings:', error);
+                businessSettings = { gstRate: 18, gstNumber: '' };
+            }
+        }
+
+        async function loadCategories() {
+            try {
+                const response = await fetch(`${API_BASE}/categories/all`);
+                const result = await response.json();
+                if (result.success) {
+                    allCategories = result.data || [];
+                    populateCategoryDropdown();
+                }
+            } catch (error) {
+                console.error('Error loading categories:', error);
+            }
+        }
+
+        function populateCategoryDropdown() {
+            const select = document.getElementById('categorySelect');
+            select.innerHTML = '<option value="">-- Select Category --</option>';
+            allCategories.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat._id;
+                option.textContent = cat.categoryName;
+                select.appendChild(option);
+            });
+        }
+
+        async function loadProducts() {
+            try {
+                const response = await fetch(`${API_BASE}/products/all`);
+                const result = await response.json();
+                if (result.success) {
+                    allProducts = result.data || [];
+                }
+            } catch (error) {
+                console.error('Error loading products:', error);
+            }
+        }
+
+        function populateProductDropdown() {
+            const categoryId = document.getElementById('categorySelect').value;
+            currentCategory = categoryId;
+            selectedProductId = null;
+            document.getElementById('qtyInput').value = '';
+            document.getElementById('productCard').classList.add('hidden');
+
+            const products = categoryId
+                ? allProducts.filter(p => p.categoryId === categoryId)
+                : allProducts;
+
+            const select = document.getElementById('productSelect');
+            select.innerHTML = '<option value="">-- Choose product --</option>';
+
+            products.forEach(p => {
+                const option = document.createElement('option');
+                option.value = p._id;
+                option.textContent = p.productName;
+                select.appendChild(option);
+            });
+        }
+
+        function updateProductDetails() {
+            const select = document.getElementById('productSelect');
+            selectedProductId = select.value;
+
+            if (!selectedProductId) {
+                document.getElementById('productCard').classList.add('hidden');
+                document.getElementById('qtyInput').value = '';
+                return;
+            }
+
+            const product = allProducts.find(p => p._id === selectedProductId);
+            if (product) {
+                const currentStock = product.stock?.current || 0;
+                const displayPrice = product.finalPrice || product.basePrice || 0;
+
+                document.getElementById('detailName').textContent = product.productName;
+                document.getElementById('detailPrice').textContent = '₹' + displayPrice;
+                document.getElementById('detailStock').textContent = currentStock + ' left';
+                document.getElementById('stockInfo').textContent = 'Available: ' + currentStock + ' units';
+                document.getElementById('productCard').classList.remove('hidden');
+            }
+        }
+
+        function addToBill() {
+            if (!selectedProductId) {
+                alert('⚠️ Please select a product!');
+                return;
+            }
+
+            const qty = parseInt(document.getElementById('qtyInput').value);
+            if (!qty || qty < 1) {
+                alert('⚠️ Please enter a valid quantity!');
+                return;
+            }
+
+            const product = allProducts.find(p => p._id === selectedProductId);
+            if (!product) return;
+
+            const displayPrice = product.finalPrice || product.basePrice || 0;
+            const currentStock = product.stock?.current || 0;
+
+            // Check if enough stock available
+            let currentBillQty = billItems[selectedProductId]?.qty || 0;
+            if (currentBillQty + qty > currentStock) {
+                alert(`⚠️ Not enough stock! Available: ${currentStock}, Requested: ${currentBillQty + qty}`);
+                return;
+            }
+
+            if (billItems[selectedProductId]) {
+                billItems[selectedProductId].qty += qty;
+            } else {
+                billItems[selectedProductId] = {
+                    id: product._id,
+                    name: product.productName,
+                    price: displayPrice,
+                    stock: currentStock,
+                    qty: qty
+                };
+            }
+
+            updateBill();
+            document.getElementById('qtyInput').value = '';
+            document.getElementById('productSelect').value = '';
+            document.getElementById('productCard').classList.add('hidden');
+        }
+
+        function updateQty(id, change) {
+            if (!billItems[id]) return;
+            billItems[id].qty += change;
+            if (billItems[id].qty <= 0) delete billItems[id];
+            updateBill();
+        }
+
+        function applyDiscount() {
+            updateBill();
+        }
+
+        function selectPaymentMethod(method) {
+            selectedPaymentMethod = method;
+            // Update button styling
+            document.querySelectorAll('.payment-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-600', 'text-white');
+                btn.classList.add('border', 'border-gray-300', 'text-gray-600', 'hover:bg-gray-50');
+            });
+            const selectedBtn = document.getElementById(`payment${method.charAt(0).toUpperCase() + method.slice(1)}`);
+            if (selectedBtn) {
+                selectedBtn.classList.remove('border', 'border-gray-300', 'text-gray-600', 'hover:bg-gray-50');
+                selectedBtn.classList.add('bg-blue-600', 'text-white');
+            }
+        }
+
+        function updateBill() {
+            const items = Object.values(billItems);
+            const container = document.getElementById('billItemsList');
+            const ITEMS_PER_BILL = 15;
+
+            if (items.length === 0) {
+                container.innerHTML = '<div class="text-center py-6 text-gray-400"><p class="text-sm">No items added yet</p></div>';
+            } else {
+                // Show warning if items exceed 15
+                let warningHTML = '';
+                if (items.length > ITEMS_PER_BILL) {
+                    const billCount = Math.ceil(items.length / ITEMS_PER_BILL);
+                    warningHTML = `<div class="p-3 mb-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">
+                        <strong>📋 Multi-Bill Alert:</strong> ${items.length} items will create ${billCount} bill(s) (max 15 items per bill)
+                    </div>`;
+                }
+
+                container.innerHTML = warningHTML + items.map(item => `
+                    <div class="flex items-center justify-between gap-2 p-2 bg-white/40 hover:bg-white/60 rounded text-xs">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between">
+                                <span class="font-semibold text-gray-900 truncate">${item.name}</span>
+                                <span class="text-gray-600 ml-2">₹${item.price}</span>
+                                <span class="text-gray-600 ml-1">${item.stock} left</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-0.5 flex-shrink-0">
+                            <button onclick="updateQty('${item.id}', -1)" class="w-5 h-5 bg-red-100 hover:bg-red-200 text-red-600 rounded font-bold text-xs flex items-center justify-center">−</button>
+                            <span class="w-4 text-center font-bold text-xs">${item.qty}</span>
+                            <button onclick="updateQty('${item.id}', 1)" class="w-5 h-5 bg-green-100 hover:bg-green-200 text-green-600 rounded font-bold text-xs flex items-center justify-center">+</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            const subtotal = items.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            const discountPercent = parseFloat(document.getElementById('discountInput').value) || 0;
+            const discountAmount = (subtotal * discountPercent) / 100;
+            const subtotalAfterDiscount = subtotal - discountAmount;
+            const gstRate = businessSettings.gstRate || 18;
+            const tax = subtotalAfterDiscount * (gstRate / 100);
+            const total = subtotalAfterDiscount + tax;
+
+            document.getElementById('subtotal').textContent = subtotal.toFixed(2);
+            document.getElementById('discount').textContent = discountAmount.toFixed(2);
+            document.getElementById('tax').textContent = tax.toFixed(2);
+            document.getElementById('total').textContent = total.toFixed(2);
+        }
+
+        async function generateBill() {
+            if (Object.keys(billItems).length === 0) {
+                alert('⚠️ Please add products first!');
+                return;
+            }
+
+            const btn = document.getElementById('printBtn');
+            btn.innerHTML = 'Saving...';
+            btn.disabled = true;
+
+            try {
+                const items = Object.values(billItems);
+                const ITEMS_PER_BILL = 15;
+                const discountPercent = parseFloat(document.getElementById('discountInput').value) || 0;
+                const gstRate = businessSettings.gstRate || 18;
+
+                // Split items into chunks of 15
+                const billChunks = [];
+                for (let i = 0; i < items.length; i += ITEMS_PER_BILL) {
+                    billChunks.push(items.slice(i, i + ITEMS_PER_BILL));
+                }
+
+                const allBillNumbers = [];
+                const totalDiscountAmount = items.reduce((sum, item) => sum + (item.price * item.qty), 0) * (discountPercent / 100);
+
+                // Create each bill
+                for (let billIndex = 0; billIndex < billChunks.length; billIndex++) {
+                    const chunkItems = billChunks[billIndex];
+
+                    // Calculate per-bill totals
+                    const chunkSubtotal = chunkItems.reduce((sum, item) => sum + (item.price * item.qty), 0);
+                    const chunkDiscount = (chunkSubtotal / items.reduce((sum, item) => sum + (item.price * item.qty), 0)) * totalDiscountAmount;
+                    const chunkSubtotalAfterDiscount = chunkSubtotal - chunkDiscount;
+                    const chunkTax = chunkSubtotalAfterDiscount * (gstRate / 100);
+                    const chunkTotal = chunkSubtotalAfterDiscount + chunkTax;
+
+                    // Format items for API
+                    const formattedItems = chunkItems.map(item => ({
+                        productId: item.id,
+                        quantity: item.qty,
+                        name: item.name,
+                        price: item.price
+                    }));
+
+                    const billData = {
+                        shopId: 'default-shop',
+                        items: formattedItems,
+                        subtotal: chunkSubtotal,
+                        discountAmount: chunkDiscount,
+                        gstRate: gstRate,
+                        gstNumber: businessSettings.gstNumber,
+                        taxAmount: chunkTax,
+                        totalAmount: chunkTotal,
+                        paymentMethod: selectedPaymentMethod,
+                        paymentStatus: 'completed',
+                        customerName: document.getElementById('customerName').value || 'Customer',
+                        customerPhone: document.getElementById('phoneNumber').value || '',
+                        billPart: billIndex + 1,
+                        totalParts: billChunks.length
+                    };
+
+                    console.log(`Creating bill ${billIndex + 1}/${billChunks.length}:`, billData);
+
+                    // Save bill to database
+                    const billResponse = await fetch(`${API_BASE}/bills/create`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(billData)
+                    });
+
+                    const billResult = await billResponse.json();
+                    console.log('Bill response:', billResult);
+
+                    if (!billResponse.ok) {
+                        throw new Error(billResult.message || 'Failed to save bill');
+                    }
+
+                    const billNumber = billResult.data?.billNumber || billResult.data?._id || 'BILL-' + Date.now();
+                    allBillNumbers.push(billNumber);
+
+                    // Update product stock for each item
+                    for (const item of chunkItems) {
+                        const product = allProducts.find(p => p._id === item.id);
+                        if (product) {
+                            const newStock = (product.stock?.current || 0) - item.qty;
+                            await fetch(`${API_BASE}/products/update/${item.id}`, {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    stock: { current: newStock }
+                                })
+                            });
+                            product.stock.current = newStock;
+                        }
+                    }
+                }
+
+                // Prepare total summary
+                const allSubtotal = items.reduce((sum, item) => sum + (item.price * item.qty), 0);
+                const allTax = (allSubtotal - totalDiscountAmount) * (gstRate / 100);
+                const allTotal = allSubtotal - totalDiscountAmount + allTax;
+
+                // Redirect to bill preview with all bills
+                const previewParams = new URLSearchParams({
+                    billNumbers: JSON.stringify(allBillNumbers),
+                    date: new Date().toLocaleDateString('en-IN'),
+                    customer: document.getElementById('customerName').value || '',
+                    subtotal: allSubtotal.toFixed(2),
+                    discount: totalDiscountAmount.toFixed(2),
+                    tax: allTax.toFixed(2),
+                    total: allTotal.toFixed(2),
+                    gstRate: gstRate,
+                    gstNumber: businessSettings.gstNumber || '--',
+                    payment: selectedPaymentMethod,
+                    items: JSON.stringify(items.map(item => ({
+                        productId: item.id,
+                        quantity: item.qty,
+                        name: item.name,
+                        price: item.price
+                    }))),
+                    billCount: billChunks.length
+                });
+
+                window.location.href = `/billPreview?${previewParams.toString()}`;
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('⚠️ Failed to generate bill: ' + error.message);
+                btn.innerHTML = 'Generate Bill';
+                btn.disabled = false;
+            }
+        }
+
+        function clearBill() {
+            if (Object.keys(billItems).length === 0) return;
+            if (confirm('🗑️ Clear entire bill?')) {
+                billItems = {};
+                updateBill();
+            }
+        }
+
+        function handleLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.clear();
+                window.location.href = '/login';
+            }
+        }
+
+        window.onload = function () {
+            if (localStorage.getItem('isLoggedIn') !== 'true') window.location.href = '/login';
+            // Load saved theme
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+            }
+            loadBusinessSettings();
+            loadCategories();
+            loadProducts();
+        };
+    </script>
+</body>
+
+</html>

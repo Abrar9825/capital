@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bills Summary - Capital Billing</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Poppins', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
+        .fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .bill-card { transition: all 0.3s ease; }
+        .bill-card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
+        body.dark-mode { background: linear-gradient(to bottom right, #0f172a, #1e293b, #334155); }
+        body.dark-mode .glass { background: rgba(30, 41, 59, 0.7); border-color: rgba(71, 85, 105, 0.3); }
+        body.dark-mode .text-gray-900 { color: #f1f5f9 !important; }
+        body.dark-mode .text-gray-700 { color: #cbd5e1 !important; }
+        body.dark-mode .text-gray-600 { color: #cbd5e1 !important; }
+        body.dark-mode .bg-white { background-color: #1e293b !important; }
+        body.dark-mode .border-gray-200 { border-color: #334155 !important; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="w-full max-w-2xl">
+            <div class="glass rounded-2xl p-8 space-y-8 fade-in">
+                <!-- Success Header -->
+                <div class="text-center space-y-2">
+                    <div class="text-6xl mb-4">✅</div>
+                    <h1 class="text-3xl sm:text-4xl font-bold text-gray-900">Bills Created Successfully!</h1>
+                    <p class="text-gray-600">Your order has been split into multiple bills</p>
+                </div>
+
+                <!-- Summary Stats -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 bg-blue-50 rounded-lg">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-blue-600" id="billCount">0</div>
+                        <div class="text-xs text-gray-600">Total Bills</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-green-600" id="itemCount">0</div>
+                        <div class="text-xs text-gray-600">Items</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-orange-600">₹<span id="totalAmt">0</span></div>
+                        <div class="text-xs text-gray-600">Total</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-purple-600">₹<span id="totalTax">0</span></div>
+                        <div class="text-xs text-gray-600">GST</div>
+                    </div>
+                </div>
+
+                <!-- Bills List -->
+                <div class="space-y-3">
+                    <h2 class="text-lg font-semibold text-gray-900">📋 Bills to Print:</h2>
+                    <div id="billsList" class="space-y-2">
+                        <!-- Bills will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="space-y-3">
+                    <button onclick="printAllBills()" class="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition flex items-center justify-center space-x-2">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                        </svg>
+                        <span>🖨️ Print All Bills</span>
+                    </button>
+                    <button onclick="backToBilling()" class="w-full px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-900 font-semibold rounded-lg transition flex items-center justify-center space-x-2">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
+                        <span>Create New Bill</span>
+                    </button>
+                </div>
+
+                <!-- Customer Info -->
+                <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <p class="text-sm text-gray-600"><strong>Customer:</strong> <span id="customerName">N/A</span></p>
+                    <p class="text-sm text-gray-600 mt-1"><strong>Payment Method:</strong> <span id="paymentMethod">N/A</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function getUrlParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const value = urlParams.get(param);
+            try {
+                return value ? JSON.parse(decodeURIComponent(value)) : null;
+            } catch (e) {
+                return value;
+            }
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(amount);
+        }
+
+        function generateBillPreviewURL(billNumber) {
+            const subtotal = parseFloat(getUrlParam('subtotal')) || 0;
+            const discount = parseFloat(getUrlParam('discount')) || 0;
+            const tax = parseFloat(getUrlParam('tax')) || 0;
+            const total = parseFloat(getUrlParam('total')) || 0;
+            const gstRate = getUrlParam('gstRate') || 18;
+            const gstNumber = getUrlParam('gstNumber') || '--';
+            const customer = getUrlParam('customer') || '';
+            const payment = getUrlParam('payment') || 'Cash';
+
+            const params = new URLSearchParams({
+                billNumber: billNumber,
+                date: new Date().toLocaleDateString('en-IN'),
+                customer: customer,
+                subtotal: subtotal.toFixed(2),
+                discount: discount.toFixed(2),
+                tax: tax.toFixed(2),
+                total: total.toFixed(2),
+                gstRate: gstRate,
+                gstNumber: gstNumber,
+                payment: payment
+            });
+
+            return `/billPreview?${params.toString()}`;
+        }
+
+        function printBill(billNumber) {
+            window.open(generateBillPreviewURL(billNumber), '_blank');
+        }
+
+        function printAllBills() {
+            const billNumbers = getUrlParam('billNumbers') || [];
+            if (billNumbers.length === 0) {
+                alert('❌ No bills found!');
+                return;
+            }
+            
+            billNumbers.forEach((billNumber, index) => {
+                setTimeout(() => {
+                    window.open(generateBillPreviewURL(billNumber), '_blank');
+                }, index * 500);
+            });
+        }
+
+        function backToBilling() {
+            window.location.href = '/billing';
+        }
+
+        function initializePage() {
+            const billNumbers = getUrlParam('billNumbers') || [];
+            const billCount = getUrlParam('billCount') || billNumbers.length;
+            const itemCount = getUrlParam('itemCount') || 0;
+            const subtotal = parseFloat(getUrlParam('subtotal')) || 0;
+            const discount = parseFloat(getUrlParam('discount')) || 0;
+            const tax = parseFloat(getUrlParam('tax')) || 0;
+            const total = parseFloat(getUrlParam('total')) || 0;
+            const customer = getUrlParam('customer') || 'Customer';
+            const payment = getUrlParam('payment') || 'Cash';
+
+            // Update stats
+            document.getElementById('billCount').textContent = billCount;
+            document.getElementById('itemCount').textContent = itemCount;
+            document.getElementById('totalAmt').textContent = total.toFixed(2);
+            document.getElementById('totalTax').textContent = tax.toFixed(2);
+            document.getElementById('customerName').textContent = customer;
+            document.getElementById('paymentMethod').textContent = payment;
+
+            // Generate bills list
+            const billsList = document.getElementById('billsList');
+            billsList.innerHTML = billNumbers.map((billNumber, index) => `
+                <div class="bill-card p-4 bg-white border border-gray-200 rounded-lg flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="flex-shrink-0">
+                            <div class="flex items-center justify-center h-10 w-10 rounded-full bg-blue-100">
+                                <span class="text-blue-600 font-bold text-sm">#${index + 1}</span>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-gray-900">${billNumber}</p>
+                            <p class="text-xs text-gray-500">Bill ${index + 1} of ${billCount}</p>
+                        </div>
+                    </div>
+                    <button onclick="printBill('${billNumber}')" class="px-4 py-2 bg-orange-100 hover:bg-orange-200 text-orange-600 font-medium rounded-lg transition">
+                        🖨️ Print
+                    </button>
+                </div>
+            `).join('');
+
+            // Load theme
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+            }
+        }
+
+        window.addEventListener('load', initializePage);
+    </script>
+</body>
+</html>
